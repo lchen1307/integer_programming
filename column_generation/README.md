@@ -1,5 +1,13 @@
 # 列生成算法及其代码实现
 
+* **代码说明：**
+  * **code_1:** 列生成算法的提出动机
+  * **code_2:** 下料问题的两种建模方式
+* **主要参考资料：**
+  1. 列生成与分支定价. Wooden Zhang. https://www.bilibili.com/video/BV1fh4y1g7dK/?spm_id_from=333.999.0.0
+  2. 列生成暑期课程. 孙小玲. https://www.bilibili.com/video/BV1Xg4y1j7xy?spm_id_from=333.788.videopod.episodes&vd_source=1b86837283b19db179b87f3761ae1daf&p=8
+  3. 
+
 ## 1 下料问题
 
 ### 1.1 问题描述
