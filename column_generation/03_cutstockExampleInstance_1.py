@@ -40,7 +40,7 @@ MP.optimize()
 MP.params.OutputFlag = 0
 Iter = 0
 eps = -0.0001
-while(MP.Status== GRB.OPTIMAL):
+while(MP.Status == GRB.OPTIMAL):
     pi = { i : -cons[i].Pi for i in range(itemNum)}
     SP.setObjective(SPvars.prod(pi))
     SP.optimize()
