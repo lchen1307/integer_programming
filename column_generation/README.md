@@ -6,7 +6,7 @@
 * **主要参考资料：**
   1. 列生成与分支定价. Wooden Zhang. https://www.bilibili.com/video/BV1fh4y1g7dK/?spm_id_from=333.999.0.0
   2. 列生成暑期课程. 孙小玲. https://www.bilibili.com/video/BV1Xg4y1j7xy?spm_id_from=333.788.videopod.episodes&vd_source=1b86837283b19db179b87f3761ae1daf&p=8
-  3. 
+  3. 优化 | 下料问题精讲：模型、求解算法及编程实战. 运小筹. https://mp.weixin.qq.com/s/2_SeN0IIYeuxFaCbt3JhDQ
 
 ## 1 下料问题
 
