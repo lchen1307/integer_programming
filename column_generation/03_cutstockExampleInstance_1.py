@@ -37,10 +37,10 @@ MP.optimize()
 
 
 # We will loop as long as we find interesting variables
-MP.params.OutputFlag = 0
+MP.Params.OutputFlag = 0
 Iter = 0
 eps = -0.0001
-while(MP.Status == GRB.OPTIMAL):
+while MP.Status == GRB.OPTIMAL:   # 求解完主问题得到对偶变量才能求解子问题
     pi = { i : -cons[i].Pi for i in range(itemNum)}
     SP.setObjective(SPvars.prod(pi))
     SP.optimize()
@@ -73,7 +73,7 @@ while(MP.Status == GRB.OPTIMAL):
 MP.write('03_final_MP.lp')
 rootbound= MP.ObjBound
 
-MP.params.OutputFlag = 1
+MP.Params.OutputFlag = 1
 Mvars= MP.getVars()
 for v in Mvars:
     if v.X > 0.0001:
