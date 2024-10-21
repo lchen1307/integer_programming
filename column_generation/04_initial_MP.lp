@@ -3,8 +3,8 @@
 Minimize
   10000 slackVar[0] + 10000 slackVar[1] + 10000 slackVar[2]
 Subject To
- R0: slackVar[0] >= 11
- R1: slackVar[1] >= 36
- R2: slackVar[2] >= 12
+ R0: slackVar[0] >= 9
+ R1: slackVar[1] >= 16
+ R2: slackVar[2] >= 47
 Bounds
 End
