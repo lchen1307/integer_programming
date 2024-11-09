@@ -1,5 +1,5 @@
 from gurobipy import *
-from gurobipy.gurobipy import GRB
+from gurobipy import GRB
 
 # Step 1: Initialize Restricted Master Problem (RMP)
 RMP = Model('DW Master Problme')
