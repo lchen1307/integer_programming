@@ -34,33 +34,78 @@ class MCTP:
         # 子问题的解产生的总运输成本，在添加新列的时候，是新变量的目标函数系数
 
 
-    def readData(self, filename):
-        with open(filename, 'r') as data:
-            self.NumOrg = int(data.readline())
-            self.NumDes = int(data.readline())
-            self.NumProduct = int(data.readline())
+    # def readData(self, filename):
+    #     with open(filename, 'r') as data:
+    #         self.NumOrg = int(data.readline())
+    #         self.NumDes = int(data.readline())
+    #         self.NumProduct = int(data.readline())
+    #
+    #         for i in range(self.NumOrg):
+    #             col = data.readline().split()
+    #             SupplyData = []
+    #             for k in range(self.NumProduct):
+    #                 SupplyData.append(float(col[k]))
+    #             self.Supply.append(SupplyData)
+    #
+    #         for j in range(self.NumDes):
+    #             col = data.readline().split()
+    #             DemandData = []
+    #             for k in range(self.NumProduct):
+    #                 DemandData.append(float(col[k]))
+    #             self.Demand.append(DemandData)
+    #
+    #         for i in range(self.NumOrg):
+    #             CostData = []
+    #             for j in range(self.NumDes):
+    #                 col = data.readline().split()
+    #                 CostData_temp = []
+    #                 for k in range(self.NumProduct):
+    #                     CostData_temp.append(float(col[k]))
+    #                 CostData.append(CostData_temp)
+    #             self.Cost.append(CostData)
 
-            for i in range(self.NumOrg):
-                col = data.readline().split()
-                SupplyData = []
-                for k in range(self.NumProduct):
-                    SupplyData.append(float(col[k]))
+    def readData(self, filename):
+        # Initialize data structures if not already initialized
+        self.Supply = []
+        self.Demand = []
+        self.Capacity = []
+        self.Cost = []
+
+        with open(filename, 'r') as data:
+            # Define a helper function to ignore comments after the main data
+            def read_int_line():
+                line = data.readline().split('#')[0].strip()  # Remove comments and extra spaces
+                return int(line)
+
+            def read_float_line():
+                line = data.readline().split('#')[0].strip()
+                return [float(x) for x in line.split()]
+
+            # Read the number of suppliers, customers, and commodity categories
+            self.NumOrg = read_int_line()
+            self.NumDes = read_int_line()
+            self.NumProduct = read_int_line()
+
+            # Read supply data
+            for _ in range(self.NumOrg):
+                SupplyData = read_float_line()
                 self.Supply.append(SupplyData)
 
-            for j in range(self.NumDes):
-                col = data.readline().split()
-                DemandData = []
-                for k in range(self.NumProduct):
-                    DemandData.append(float(col[k]))
+            # Read demand data
+            for _ in range(self.NumDes):
+                DemandData = read_float_line()
                 self.Demand.append(DemandData)
 
-            for i in range(self.NumOrg):
+            # Read capacity data
+            for _ in range(self.NumOrg):
+                CapacityData = read_float_line()
+                self.Capacity.append(CapacityData)
+
+            # Read cost data
+            for _ in range(self.NumOrg):
                 CostData = []
-                for j in range(self.NumDes):
-                    col = data.readline().split()
-                    CostData_temp = []
-                    for k in range(self.NumProduct):
-                        CostData_temp.append(float(col[k]))
+                for _ in range(self.NumDes):
+                    CostData_temp = read_float_line()
                     CostData.append(CostData_temp)
                 self.Cost.append(CostData)
 
@@ -366,6 +411,6 @@ class MCTP:
 
 if __name__ == '__main__':
     MCTP_instance = MCTP()
-    MCTP_instance.readData('MCTP_data.txt')
+    MCTP_instance.readData('MCTP.txt')
     MCTP_instance.solveMCTP()
     MCTP_instance.reportSolution()
