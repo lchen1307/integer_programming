@@ -4,6 +4,7 @@ from bokeh.layouts import column
 from gurobipy import *
 
 class MCTP:
+
     def __init__(self):
         # initialize data
         self.NumOrg = 0
@@ -31,6 +32,7 @@ class MCTP:
         # 容量约束的对偶变量，更新子问题目标函数使用
         self.SP_totalCost = []
         # 子问题的解产生的总运输成本，在添加新列的时候，是新变量的目标函数系数
+
 
     def readData(self, filename):
         with open(filename, 'r') as data:
@@ -61,6 +63,7 @@ class MCTP:
                         CostData_temp.append(float(col[k]))
                     CostData.append(CostData_temp)
                 self.Cost.append(CostData)
+
 
     def initializeModel(self):
         # initialize master problem and subproblem
@@ -115,6 +118,7 @@ class MCTP:
 
         # export the initial RMP with aitificial variable
         self.RMP.write('initial_RMP.lp')
+
 
     def optimizePhase_1(self):
         # initialize parameters
@@ -200,6 +204,7 @@ class MCTP:
 
                 self.subProblem.setObjective(obj_sub_phase_1, GRB.MINIMIZE)
 
+
     def updateModelPhase_2(self):
         # update model of Phase 2
         print('----------start update model of Phase 2----------')
@@ -208,7 +213,155 @@ class MCTP:
         obj_master_phase_2 = quicksum(self.SP_totalCost[i] * self.var_lambda[i] \
                                         for i in range(len(self.SP_totalCost)))
 
+        self.RMP.setObjective(obj_master_phase_2, GRB.MINIMIZE)
 
+        # fix the value of artificial variable to 0
+        self.var_Artificial.lb = 0
+        self.var_Artificial.ub = 0
+
+        # solve RMP in Phase 2
+        self.RMP.optimize()
+
+        # update dual variables
+        for i in range(self.NumOrg):
+            for j in range(self.NumDes):
+                self.dual_CapacityCons[i][j] = self.CapacityCons[i][j].pi
+
+        self.dual_convexCons = self.convexCons.pi
+
+        # update objective for subproblem by dual variables of RMP
+        obj_sub_phase_2 = quicksum((self.Cost[i][j][k] - self.dual_CapacityCons[i][j]) * self.var_x[i][j][k] \
+                                   for i in range(self.NumOrg) \
+                                   for j in range(self.NumDes) \
+                                   for k in range(self.NumProduct)) - self.dual_convexCons
+
+        self.subProblem.setObjective(obj_sub_phase_2, GRB.MINIMIZE)
+
+        # update iteration info
+        self.Iter = self.Iter + 1
+
+
+    def optimizePhase_2(self):
+        # start Phase 2 of dantzig-wolfe decomposition
+        print('----------start Phase 2 optimization----------')
+
+        while True:
+            print('---Iter: ', self.Iter)
+
+            # solve subproblem in Phase 2
+            self.subProblem.optimize()
+
+            if self.subProblem.objval >= -1e-6:
+                print('--- obj of subProblem reaches 0, no new columns ---')
+                break
+            else:
+                self.Iter = self.Iter + 1
+
+                # compute the total cost of subproblem solutions
+                # the total cost is the coefficient of RMP when new column is added
+                totalCost_subProblem = sum(self.Cost[i][j][k] * self.var_x[i][j][k].x \
+                                            for i in range(self.NumOrg) \
+                                            for j in range(self.NumDes) \
+                                            for k in range(self.NumProduct))
+
+                # update RMP: add new column into RMP
+                # 1. create new column
+                col = Column()
+                for i in range(self.NumOrg):
+                    for j in range(self.NumDes):
+                        col.addTerms(sum(self.var_x[i][j][k].x for k in range(self.NumProduct)), self.CapacityCons[i][j])
+
+                col.addTerms(1.0, self.convexCons)
+
+                # 2. add new columns to RMP
+                self.var_lambda.append(self.RMP.addVar(lb = 0.0
+                                                       , ub = GRB.INFINITY
+                                                       , obj = totalCost_subProblem
+                                                       , vtype = GRB.CONTINUOUS
+                                                       , name = 'lambda_phase2_' + str(self.Iter)
+                                                       , column = col))
+
+                # solve RMP of Phase 2
+                self.RMP.optimize()
+
+                # update dual variables
+                for i in rang(self.NumOrg):
+                    for j in range(self.NumDes):
+                        self.dual_CapacityCons[i][j] = self.CapacityCons[i][j].pi
+
+                self.dual_convexCons = self.convexCons.pi
+
+                # update objective of subproblem
+                obj_sub_phase_2 = quicksum((self.Cost[i][j][k] - self.dual_CapacityCons[i][j]) * self.var_x[i][j][k] \
+                                           for i in range(self.NumOrg) \
+                                           for j in range(self.NumDes) \
+                                           for k in range(self.NumProduct)) - self.dual_convexCons
+
+                self.subProblem.setObjective(obj_sub_phase_2, GRB.MINIMIZE)
+
+
+    def optimizeFinalRMP(self):
+        # obtain the initial solution according the RMP solution
+        opt_x = []
+        for i in range(self.NumOrg):
+            opt_x_commodity = [0.0]
+            opt_x.append(opt_x_commodity)
+
+        # Dantzig-Wolfe decomposition: solve the final model
+        print('---------- start optimization final RMP ----------')
+
+        # update objective for RMP
+        for i in range(self.NumOrg):
+            for j in range(self.NumDes):
+                opt_x[i][j] = self.Capacity[i][j] + self.var_Artificial.x - self.CapacityCons[i][j].slack
+
+        obj_master_final = quicksum(self.Cost[i][j][k] * self.var_x[i][j][k] \
+                                    for i in range(self.NumOrg) \
+                                    for j in range(self.NumDes) \
+                                    for k in range(self.NumProduct))
+
+        self.subProblem.setObjective(obj_master_final, GRB.MINIMIZE)
+
+        for i in range(self.NumOrg):
+            for j in range(self.NumDes):
+                self.subProblem.addConstr(quicksum(self.var_x[i][j][k] for k in range(self.NumProduct)) == opt_x[i][j])
+
+        # solve
+        self.subProblem.setParam('OutputFlag', 1)
+        self.subProblem.optimize()
+
+
+    def solveMCTP(self):
+        # initialize the RMP and subproblem
+        self.initializeModel()
+
+        # Dantzig-Wolfe decomposition
+        print('-------------------------------------------------------')
+        print('---------- start Dantzig-Wolfe decomposition ----------')
+        print('-------------------------------------------------------')
+        self.optimizePhase_1()
+
+        self.updateModelPhase_2()
+
+        self.optimizePhase_2()
+
+        self.optimizeFinalRMP()
+
+        print('-------------------------------------------------------')
+        print('---------- end Dantzig-Wolfe decomposition ------------')
+        print('-------------------------------------------------------')
+
+
+    def reportSolution(self):
+        # report the optimal solution
+        print('----------- solution info ------------')
+        print('Objective: ', self.subProblem.objval)
+        print('Solution: ')
+        for i in range(self.NumOrg):
+            for j in range(self.NumDes):
+                for k in range(self.NumProduct):
+                    if abs(self.var_x[i][j][k].x) > 0:
+                        print('  x[%d, %d, %d] = % 10.2f' % (i, j, k, round(self.var_x[i][j][k].x, 2)))
 
 
 if __name__ == '__main__':
