@@ -1,0 +1,39 @@
+Setting log file to Log_4_4_grid_Max_Step_14NIPF.log
+Setting parameter 'RelGap' to 0
+Setting parameter 'TimeLimit' to 14400
+Model fingerprint: 920f866e
+
+Using Cardinal Optimizer v7.0.3 on Windows
+Hardware has 14 cores and 20 threads. Using instruction set X86_AVX2 (10)
+Minimizing a MIP problem
+
+The original problem has:
+    30202 rows, 10752 columns and 88994 non-zero elements
+    10752 binaries
+
+Presolving the problem
+
+The presolved problem has:
+    1655 rows, 1176 columns and 7008 non-zero elements
+    1176 binaries
+
+Starting the MIP solver with 20 threads and 64 tasks
+
+     Nodes    Active  LPit/n  IntInf     BestBound  BestSolution    Gap   Time
+         0         1      --       0  0.000000e+00            --    Inf  1.37s
+H        0         1      --       0  0.000000e+00  1.300000e+01 100.0%  2.23s
+         1         1     0.0       0  1.300000e+01  1.300000e+01  0.00%  2.24s
+         1         1     0.0       0  1.300000e+01  1.300000e+01  0.00%  2.24s
+
+Best solution   : 13.000000000
+Best bound      : 13.000000000
+Best gap        : 0.0000%
+Solve time      : 2.24
+Solve node      : 1
+MIP status      : solved
+Solution status : integer optimal (relative gap limit 0)
+
+Violations      :     absolute     relative
+  bounds        :            0            0
+  rows          :            0            0
+  integrality   :            0

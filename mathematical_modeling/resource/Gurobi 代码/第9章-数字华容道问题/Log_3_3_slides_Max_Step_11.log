@@ -1,0 +1,29 @@
+
+Gurobi 11.0.0 (win64) logging started Tue Jul 23 00:00:25 2024
+
+Set parameter LogFile to value "Log_3_3_slides_Max_Step_11.log"
+Set parameter MIPGap to value 0
+Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (win64 - Windows 11+.0 (22631.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13650HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 14 physical cores, 20 logical processors, using up to 20 threads
+
+Optimize a model with 13030 rows, 7128 columns and 79072 nonzeros
+Model fingerprint: 0x84b72c3f
+Variable types: 0 continuous, 7128 integer (7128 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Presolve removed 13030 rows and 7128 columns
+Presolve time: 0.20s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.22 seconds (0.06 work units)
+Thread count was 1 (of 20 available processors)
+
+Solution count 1: 10 
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 1.000000000000e+01, best bound 1.000000000000e+01, gap 0.0000%

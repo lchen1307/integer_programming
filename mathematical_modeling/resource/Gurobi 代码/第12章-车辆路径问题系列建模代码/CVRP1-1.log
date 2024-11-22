@@ -1,0 +1,124 @@
+
+Gurobi 10.0.2 (win64) logging started Wed Jul 10 22:08:53 2024
+
+Set parameter LogFile to value "CVRP1-1.log"
+Set parameter MIPGap to value 0
+Set parameter LazyConstraints to value 1
+Gurobi Optimizer version 10.0.2 build v10.0.2rc0 (win64)
+
+CPU model: Intel(R) Core(TM) i7-10875H CPU @ 2.30GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 66 rows, 720 columns and 2970 nonzeros
+Model fingerprint: 0xb700f3ae
+Variable types: 0 continuous, 720 integer (720 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+01]
+  Objective range  [7e+00, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+02]
+Presolve removed 2 rows and 0 columns
+Presolve time: 0.01s
+Presolved: 64 rows, 720 columns, 2790 nonzeros
+Variable types: 0 continuous, 720 integer (720 binary)
+
+Root relaxation: objective 1.962400e+02, 66 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  196.24000    0    6          -  196.24000      -     -    0s
+     0     0  196.24000    0   14          -  196.24000      -     -    0s
+     0     0  196.24000    0    -          -  196.24000      -     -    0s
+     0     0  196.24000    0   14          -  196.24000      -     -    0s
+H    0     0                     581.2700000  196.24000  66.2%     -    0s
+H    0     0                     566.7100000  196.24000  65.4%     -    0s
+     0     0  199.60000    0   18  566.71000  199.60000  64.8%     -    0s
+     0     0  200.72000    0   28  566.71000  200.72000  64.6%     -    0s
+H    0     0                     521.6400000  200.72000  61.5%     -    0s
+     0     0  201.61600    0   32  521.64000  201.61600  61.3%     -    0s
+     0     0  202.33000    0   26  521.64000  202.33000  61.2%     -    0s
+     0     0  202.96000    0   16  521.64000  202.96000  61.1%     -    0s
+H    0     0                     433.3700000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   40  433.37000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   43  433.37000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   17  433.37000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   17  433.37000  202.96000  53.2%     -    0s
+H    0     0                     373.7300000  203.82000  45.5%     -    0s
+     0     2  203.82000    0   17  373.73000  203.82000  45.5%     -    0s
+H  337   336                     356.8700000  206.01000  42.3%   8.1    0s
+*  653   565              59     342.5100000  206.01000  39.9%   7.5    1s
+H  950   925                     334.7800000  207.34000  38.1%   7.3    1s
+H 1643  1315                     324.8000000  209.68000  35.4%   6.9    1s
+H 1647  1251                     323.9600000  214.98000  33.6%   6.9    1s
+H 1688  1225                     320.1400000  215.88962  32.6%   7.9    1s
+H 1751  1221                     309.3800000  216.95659  29.9%   8.3    2s
+H 1776  1155                     288.3700000  216.95659  24.8%   8.4    2s
+H 7659  4398                     284.2400000  229.61493  19.2%  11.5    4s
+H 7707  4196                     279.7800000  229.61493  17.9%  11.5    4s
+  9327  5561  254.13056   39   47  279.78000  231.55444  17.2%  11.8    5s
+*13578  8057              79     279.6300000  234.22216  16.2%  12.0    5s
+H21943 12495                     278.2200000  238.36000  14.3%  12.5    6s
+ 47101 23547  264.94192   30   27  278.22000  245.47143  11.8%  12.7   10s
+*55503 25567              60     276.7500000  247.10724  10.7%  12.8   11s
+ 86977 32858  269.96412   60   33  276.75000  252.18022  8.88%  13.0   15s
+ 125739 39363  266.37457   35   35  276.75000  256.40288  7.35%  13.0   20s
+ 158064 41947  271.62904   41   14  276.75000  259.17333  6.35%  13.2   25s
+ 187297 42798  275.95857   51   28  276.75000  261.18913  5.62%  13.1   30s
+ 210528 42220  268.24000   61   16  276.75000  262.70504  5.07%  13.1   35s
+
+Gurobi 10.0.2 (win64) logging started Wed Jul 10 22:26:07 2024
+
+Set parameter LogFile to value "CVRP1-1.log"
+Set parameter MIPGap to value 0
+Set parameter LazyConstraints to value 1
+Gurobi Optimizer version 10.0.2 build v10.0.2rc0 (win64)
+
+CPU model: Intel(R) Core(TM) i7-10875H CPU @ 2.30GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 66 rows, 720 columns and 2970 nonzeros
+Model fingerprint: 0xb700f3ae
+Variable types: 0 continuous, 720 integer (720 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+01]
+  Objective range  [7e+00, 6e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+02]
+Presolve removed 2 rows and 0 columns
+Presolve time: 0.01s
+Presolved: 64 rows, 720 columns, 2790 nonzeros
+Variable types: 0 continuous, 720 integer (720 binary)
+
+Root relaxation: objective 1.962400e+02, 66 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  196.24000    0    6          -  196.24000      -     -    0s
+     0     0  196.24000    0   14          -  196.24000      -     -    0s
+     0     0  196.24000    0    -          -  196.24000      -     -    0s
+     0     0  196.24000    0   14          -  196.24000      -     -    0s
+H    0     0                     581.2700000  196.24000  66.2%     -    0s
+H    0     0                     566.7100000  196.24000  65.4%     -    0s
+     0     0  199.60000    0   18  566.71000  199.60000  64.8%     -    0s
+     0     0  200.72000    0   28  566.71000  200.72000  64.6%     -    0s
+H    0     0                     521.6400000  200.72000  61.5%     -    0s
+     0     0  201.61600    0   32  521.64000  201.61600  61.3%     -    0s
+     0     0  202.33000    0   26  521.64000  202.33000  61.2%     -    0s
+     0     0  202.96000    0   16  521.64000  202.96000  61.1%     -    0s
+H    0     0                     433.3700000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   40  433.37000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   43  433.37000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   17  433.37000  202.96000  53.2%     -    0s
+     0     0  202.96000    0   17  433.37000  202.96000  53.2%     -    0s
+H    0     0                     373.7300000  203.82000  45.5%     -    0s
+     0     2  203.82000    0   17  373.73000  203.82000  45.5%     -    0s
+H  337   336                     356.8700000  206.01000  42.3%   8.1    0s
+*  653   565              59     342.5100000  206.01000  39.9%   7.5    1s
+H  950   925                     334.7800000  207.34000  38.1%   7.3    1s
+H 1643  1315                     324.8000000  209.68000  35.4%   6.9    1s
+H 1647  1251                     323.9600000  214.98000  33.6%   6.9    1s
+H 1688  1225                     320.1400000  215.88962  32.6%   7.9    2s
+H 1751  1221                     309.3800000  216.95659  29.9%   8.3    2s
+H 1776  1155                     288.3700000  216.95659  24.8%   8.4    2s

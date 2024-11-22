@@ -1,0 +1,51 @@
+
+Gurobi 10.0.2 (win64) logging started Wed Jul 10 22:22:45 2024
+
+Set parameter LogFile to value "VRPSTW1.log"
+Set parameter MIPGap to value 0
+Gurobi Optimizer version 10.0.2 build v10.0.2rc0 (win64)
+
+CPU model: Intel(R) Core(TM) i7-10875H CPU @ 2.30GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Optimize a model with 881 rows, 486 columns and 3740 nonzeros
+Model fingerprint: 0x67c43f2a
+Variable types: 66 continuous, 420 integer (420 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 2e+02]
+  Objective range  [5e-01, 6e+01]
+  Bounds range     [1e+00, 2e+02]
+  RHS range        [1e+00, 2e+02]
+Found heuristic solution: objective 955.4900000
+Presolve removed 754 rows and 276 columns
+Presolve time: 0.01s
+Presolved: 127 rows, 210 columns, 890 nonzeros
+Variable types: 0 continuous, 210 integer (175 binary)
+Found heuristic solution: objective 937.8700000
+
+Root relaxation: objective 4.717168e+02, 80 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  471.71678    0   19  937.87000  471.71678  49.7%     -    0s
+H    0     0                     574.7100000  471.71678  17.9%     -    0s
+H    0     0                     509.0450000  471.71678  7.33%     -    0s
+H    0     0                     489.0500000  485.10500  0.81%     -    0s
+     0     0  485.10500    0    7  489.05000  485.10500  0.81%     -    0s
+     0     0  485.10500    0    7  489.05000  485.10500  0.81%     -    0s
+
+Cutting planes:
+  Cover: 4
+  Implied bound: 3
+  MIR: 7
+  StrongCG: 3
+  Relax-and-lift: 3
+
+Explored 1 nodes (107 simplex iterations) in 0.03 seconds (0.01 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 5: 489.05 509.045 574.71 ... 955.49
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective 4.890500000000e+02, best bound 4.890500000000e+02, gap 0.0000%
