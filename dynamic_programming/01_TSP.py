@@ -13,6 +13,8 @@ dis_matrix = [[0, 8, 12, 17]
              , [9, 7, 11, 0]]
 
 def TSP_Dynamic_Programming(Nodes, dis_matrix):
+    # Label_set[(3, 2, '{3, 4}')] = [20, 3]：
+    # 在阶段3，从节点2出发访问{3,4}的最短距离是20，下一个访问节点是3
     Label_set = {}
     nodeNum = len(Nodes)
     org = 1
@@ -29,6 +31,7 @@ def TSP_Dynamic_Programming(Nodes, dis_matrix):
             left_node_set = set(left_node_list)
 
             # obtain all the subsets of left_node_set
+            # 枚举全部可能的路径组合
             subset_all = list(map(set, itertools.combinations(left_node_set, nodeNum - stage_ID)))
             # print('current_node: ', current_node, '\t', 'left_node_set: ', left_node_set))
 
@@ -45,7 +48,7 @@ def TSP_Dynamic_Programming(Nodes, dis_matrix):
                         subsub_set.remove(temp_next_node)
                         if (subsub_set == None or len(subsub_set) == 0):
                             subsub_set = 'None'
-                        sub_key = (stage_ID + 1, temp_next_node, subsub_set)
+                        sub_key = (stage_ID + 1, temp_next_node, str(subsub_set))
 
                         if (sub_key in Label_set.keys()):
                             if (dis_matrix[current_node -1][temp_next_node - 1] + Label_set[sub_key][0] < min_distance):
