@@ -139,7 +139,7 @@ nx.draw(Graph
         , font_size = 15
         , font_family = 'arial'
         , edge_color = 'grey'
-        , edge_list = []
+        , edgelist = []
         , nodelist = nodeList
         )
 fig_name = 'network_' + str(customerNum) + '_1000.jpg'
