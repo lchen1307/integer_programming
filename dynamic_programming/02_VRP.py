@@ -29,8 +29,13 @@ class Data:
 def readData(data, path, customerNum):
     data.customerNum = customerNum
     data.nodeNum = customerNum + 1
-    f = open(path, 'r')
-    lines = f.readlines()
+    try:
+        with open(path, 'r') as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        print('File not found')
+        return None
+
     count = 0
 
     # read the info
@@ -46,7 +51,7 @@ def readData(data, path, customerNum):
             str = re.split(r" +", line)
             data.cor_X.append(float(str[2]))
             data.cor_Y.append(float(str[3]))
-            data.demand.apend(float(str[4]))
+            data.demand.append(float(str[4]))
             data.readyTime.append(float(str[5]))
             data.dueTime.append(float(str[6]))
             data.serviceTime.append(float(str[7]))
@@ -78,14 +83,14 @@ def printData(data, customerNum):
 
 # Read Data
 data = Data()
-path = 'Solomn标准VRP算例/solomon-100/In/r100.txt'
+path = 'r101.txt'
 customerNum = 20
 readData(data, path, customerNum)
 printData(data, customerNum)
 
 # Build Graph
 # 构建有向图对象
-Graph = nx.DiGraph
+Graph = nx.DiGraph()
 cnt = 0
 pos_location = {}
 nodes_col = {}
@@ -97,6 +102,7 @@ for i in range(data.nodeNum):
     nodeList.append(name)
     nodes_col[name] = 'gray'
     node_type = 'customer'
+
     if (i == 0):
         node_type = 'depot'
     Graph.add_node(name
