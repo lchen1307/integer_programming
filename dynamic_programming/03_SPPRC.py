@@ -79,14 +79,14 @@ def printData(data, customerNum):
 
 # reading data
 data = Data()
-prth = ''
+path = 'r101.txt'
 customerNum = 100
 readData(data, path, customerNum)
 printData(data, customerNum)
 
 
 # 构建网络图
-Graph = nx.DiGraph
+Graph = nx.DiGraph()
 cnt = 0
 pos_location = {}
 nodes_col = {}
@@ -125,7 +125,7 @@ for i in range(data.nodeNum):
 # plt.rcParams['figure.figsize'] = (0.6 * trip_num, trip_num)
 nodes_col['0'] = 'red'
 nodes_col[str(data.nodeNum - 1)] = 'red'
-plc.rcParams['figure.figsize'] = (10, 10)
+plt.rcParams['figure.figsize'] = (10, 10)
 nx.draw(Graph
         , pos = pos_location
         , with_labels = True
