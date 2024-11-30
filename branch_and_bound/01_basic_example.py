@@ -126,8 +126,8 @@ def Branch_and_bound(RLP):
             if is_integer == False:
                 # For non-integer solution node, update the LB and UB
                 current_node.is_integer = False
-                current_node.local_LB = current_node.model.ObjVal
-                current_node.local_UB = 0
+                current_node.local_UB = current_node.model.ObjVal
+                current_node.local_LB = 0
                 for var_name in current_node.x_int_sol.keys():
                     var = current_node.model.getVarByName(var_name)
                     current_node.local_LB += current_node.x_int_sol[var_name] * var.Obj
@@ -202,7 +202,7 @@ def Branch_and_bound(RLP):
                         temp_global_UB = node.model.ObjVal
 
             global_UB = temp_global_UB
-            Global_UB_change.append(lobal_UB)
+            Global_UB_change.append(global_UB)
             Global_LB_change.append(global_LB)
 
     # all the nodes are explored, update the LB and UB
