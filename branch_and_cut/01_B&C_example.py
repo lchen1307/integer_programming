@@ -59,3 +59,41 @@ class Data:
         data.serviceTime.append(data.serviceTime[0])
 
         # compute the distance matrix
+        data.disMatrix = [([0] * data.nodeNum) for p in range(data.nodeNum)]
+        for i in range(0, data.nodeNum):
+            for j in range(0, data.nodeNum):
+                temp = (data.cor_X[i] - data.cor_X[j])**2 + (data.cor_Y[i] - data.cor_Y[j])**2
+                data.disMatrix[i][j] = round(math.sqrt(temp), 1)
+                temp = 0
+
+        # initialize the arc
+        for i in range(data.nodeNum):
+            for j in range(data.nodeNum):
+                if (i == j):
+                    data.arcs[i, j] = 0
+                if (i != j):
+                    data.arcs[i, j] = 1
+        return data
+
+    def preprocess(data):
+        # preprocessing for ARCS
+        # 除去不符合时间窗和容量约束的变
+        for i in range(data.nodeNum):
+            for j in range(data.nodeNum):
+                if (i == j):
+                    data.arcs[i, j] = 0
+                elif (data.readyTime[i] + data.serviceTime[i] + data.disMatrix[i][j] > data.dueTime[j]\
+                        or data.demand[i] + data.demand[j] > data.capacity):
+                    data.arcs[i, j] = 0
+                elif (data.readyTime[0] + data.serviceTime[i] + data.disMatrix[0][i] + data.disMatrix[i][data.nodeNum-1] > data.dueTime[data.nodeNum-1]):
+                    print('the calculating example is false')
+                else:
+                    data.arcs[i, j] = 1
+
+        for i in range(data.nodeNum):
+            data.arcs[data.nodeNum-1, i] = 0
+            data.arcs[i, 0] = 0
+
+        return data
+
+    def printData(data, customerNum):
