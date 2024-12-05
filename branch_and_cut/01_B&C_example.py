@@ -9,6 +9,9 @@ import networkx as nx
 import copy
 import random
 
+from networkx.classes import nodes
+from pylint.checkers.utils import node_type
+
 
 class Data:
     def __init__(self):
@@ -97,5 +100,50 @@ class Data:
         return data
 
     def printData(data, customerNum):
+        print('打印下面数据：\n')
+        print('vehicle number = %4d' % data.vehicleNum)
+        print('vehicle capacity = %4d' % data.capacity)
+        for i in range(len(data.demand)):
+            print('{0}\t{1}\t{2}\t{3}'.format(data.demand[i], data.readyTime[i], data.dueTime[i], data.serviceTime[i]))
 
-        aaa
+        print('---------- 距离矩阵 ----------\n')
+        for i in range(data.nodeNum):
+            for j in range(data.nodeNum):
+                print('%6.2f' % (data.disMatrix[i][j]), end = '')
+            print()
+
+data = Data()
+path = 'r101.txt'
+customerNum = 30
+data = Data.readData(data, path, customerNum)
+data.vehicleNum = 8
+Data.printData(data, customerNum)
+
+
+# Build Graph
+# 构建有向图对象
+Graph = nx.DiGraph()
+cnt = 0
+pos_location = {}
+nodes_col = {}
+nodeList = []
+for i in range(data.nodeNum):
+    X_coor = data.cor_X[i]
+    Y_coor = data.cor_Y[i]
+    name = str(i)
+    nodeList.append(name)
+    nodes_col[name] = 'gray'
+    node_type = 'customer'
+    if (i == 0):
+        node_type = 'depot'
+    Graph.add_node(name
+                   , ID = 1
+                   , node_type = node_type
+                   , time_window = (data.readyTime[i], data.dueTime[i])
+                   , arrive_time = 10000
+                   , demand = data.demand
+                   , serviceTime = data.serviceTime
+                   , x_coor = X_coor
+                   , y_coor = Y_coor
+                   , min_dis = 0
+                   )
