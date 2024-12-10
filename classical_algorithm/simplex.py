@@ -25,3 +25,25 @@ Nonbasic = [0, 1]
 c = np.array([2, 3, 0, 0, 0]).astype(float)
 c_B = np.array([0, 0, 0]).astype(float)
 c_N = np.array([2, 3]).astype(float)
+A = np.array([[1, 2, 1, 0, 0]
+            , [4, 0, 0, 1, 0]
+            , [0, 4, 0, 0, 1]]).astype(float)
+A_N = np.array([[1, 2]
+              , [4, 0]
+              , [0, 4]]).astype(float)
+b = np.array([8, 16, 12]).astype(float)
+B_inv = np.array([[1, 0, 0]
+                , [0, 1, 0]
+                , [0, 0, 1]]).astype(float)
+
+x_opt = np.array([0, 0, 0, 0, 0]).astype(float)
+z_opt = 0
+
+solutionStatus = None
+
+row_num = len(A)
+column_num = len(A[0])
+
+reducedCost = c_N - np.dot(np.dot(c_B, B_inv), A_N)
+reducedCost
+
