@@ -47,3 +47,22 @@ column_num = len(A[0])
 reducedCost = c_N - np.dot(np.dot(c_B, B_inv), A_N)
 reducedCost
 
+max_sigma = max(reducedCost)
+print(np.argmax(reducedCost))
+eps = 0.001
+
+iterNum = 1
+while (max_sigma >= eps):
+    # indentify unbounded
+    '''
+    pass
+    '''
+    # determine the entering basic variables
+    enter_var_index = Nonbasic[np.argmax(reducedCost)]
+    print('enter_var_index: ', enter_var_index)
+
+    # determine the leaving basic variable: minimum ratio test
+    min_ratio = 1000000
+    leave_var_index = 0
+    for i in range(row_num):
+        print('b: ', b[i], '\t A:', A[i][enter_var_index], '\t ratio:', b[i]/A[i][enter_var_index])
