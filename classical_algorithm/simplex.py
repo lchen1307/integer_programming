@@ -66,3 +66,18 @@ while (max_sigma >= eps):
     leave_var_index = 0
     for i in range(row_num):
         print('b: ', b[i], '\t A:', A[i][enter_var_index], '\t ratio:', b[i]/A[i][enter_var_index])
+        if (A[i][enter_var_index] == 0):
+            # solutionStatus = 'Model is infeasible'
+            continue
+            # return solutionStatus
+        elif (b[i]/A[i][enter_var_index] < min_ratio and b[i]/A[i][enter_var_index] > 0):
+            min_ratio = b[i]/A[i][enter_var_index]
+            leave_var_index = i
+            print(min_ratio)
+
+    # process entering basis and leaving basis
+    leave_var = Basic[leave_var_index]
+    Basic[leave_var_index] = enter_var_index
+    Nonbasic.remove(enter_var_index)
+    Nonbasic.append(leave_var)
+    Nonbasic.sort()
