@@ -11,6 +11,7 @@ import random
 
 from networkx.classes import nodes
 from pylint.checkers.utils import node_type
+from sympy.physics.units import length
 
 
 class Data:
@@ -114,7 +115,7 @@ class Data:
 
 data = Data()
 path = 'r101.txt'
-customerNum = 30
+customerNum = 100
 data = Data.readData(data, path, customerNum)
 data.vehicleNum = 8
 Data.printData(data, customerNum)
@@ -146,6 +147,173 @@ for i in range(data.nodeNum):
                    , x_coor = X_coor
                    , y_coor = Y_coor
                    , min_dis = 0
+                   , previous_node = None
                    )
 
+    pos_location[name] = (X_coor, Y_coor)
 
+# add edges into the graph
+for i in range(data.nodeNum):
+    for j in range(data.nodeNum):
+        if (i == j or (i == 0 and j == data.nodeNum - 1) or (j ==0 and i == data.nodeNum - 1)):
+            pass
+        else:
+            Graph.add_edge(str(i), str(j)
+                           , travelTime = data.disMatrix[i][j]
+                           , length = data.disMatrix[i][j]
+                           )
+
+nodes_col['0'] = 'red'
+nodes_col[str(data.nodeNum - 1)] = 'red'
+plt.rcParams['figure.figsize'] = (10, 10)
+nx.draw(Graph
+        , pos = pos_location
+        , with_labels = True
+        , node_size = 50
+        , node_color = nodes_col.values()
+        , font_size = 15
+        , font_family = 'arial'
+        , edgelist = []
+        )
+
+fig_name = 'network_' + str(customerNum) + '_1000.jpg'
+plt.savefig(fig_name, dpi = 600)
+plt.show()
+
+# Build and solve VRPTW
+big_M = 100000
+
+# create the model
+model = Model('VRPTW')
+
+# decision variables
+x = {}
+x_var = {}
+s = {}
+for i in range(data.nodeNum):
+    for k in range(data.vehicleNum):
+        name = 's_' + str(i) + '_' + str(k)
+        s[i, k] = model.addVar(lb = data.readyTime[i]
+                               , ub = data.dueTime[i]
+                               , vtype = GRB.CONTINUOUS
+                               , name = name
+                               )
+        for j in range(data.nodeNum):
+            if (i != j and data.arcs[i, j] == 1):
+                name = 'x_' + str(i) + '_' + str(j) + '_' + str(k)
+                x[i, j, k] = model.addVar(lb = 0
+                                          , ub = 1
+                                          , vtype = GRB.BINARY
+                                          , name = name
+                                          )
+                x_var[i, j, k] = model.addVar(lb = 0
+                                              , ub = 1
+                                              , vtype = GRB.CONTINUOUS
+                                              , name = name
+                                              )
+
+# Add constraints
+# create the objective expression
+obj = LinExpr()
+for i in range(data.nodeNum):
+    for j in range(data.nodeNum):
+        if (i != j and data.arcs[i, j] == 1):
+            for k in range(data.vehicleNum):
+                obj.addTerms(data.disMatrix[i][j], x[i, j, k])
+
+# add the objective function into the model
+model.setObjective(obj, GRB.MINIMIZE)
+
+# constraint 1
+for i in range(1, data.nodeNum - 1):
+    expr = LinExpr(0)
+    for j in range(data.nodeNum):
+        if (i != j and data.arcs[i, j] == 1):
+            for k in range(data.vehicleNum):
+                if (i != 0 and i != data.nodeNum - 1):
+                    expr.addTerms(1, x[i, j, k])
+
+    model.addConstr(expr == 1, 'c1')
+    expr.clear()
+
+# constraint 2
+for k in range(data.vehicleNum):
+    expr = LinExpr(0)
+    for i in range(1, data.nodeNum - 1):
+        for j in range(data.nodeNum):
+            if (i != 0 and i != data.nodeNum - 1 and i != j and data.arcs[i, j] == 1):
+                expr.clear()
+
+# constraint 3
+for k in range(data.vehicleNum):
+    expr = LinExpr(0)
+    for j in range(1, data.nodeNum): # 需要时刻注意不能有 i = j 的情况出现
+        if (data.arcs[0, j] == 1):
+            expr.addTerms(1.0, x[0, j, k])
+    model.addConstr(expr == 1.0, 'c3')
+    expr.clear()
+
+# constraint 4
+for k in range(data.vehicleNum):
+    for h in range(1, data.nodeNum - 1):
+        expr1 = LinExpr(0)
+        expr2 = LinExpr(0)
+        for i in range(data.nodeNum):
+            if (h != i and data.arcs[i, h] == 1):
+                expr1.addTerms(1, x[i, h, k])
+
+        for j in range(data.nodeNum):
+            if (h != j and data.arcs[h, j] == 1):
+                expr2.addTerms(1, x[h, j, k])
+
+        model.addConstr(expr1 == expr2, 'c4')
+        expr1.clear()
+        expr2.clear()
+
+# constraint 5
+for k in range(data.vehicleNum):
+    expr = LinExpr(0)
+    for i in range(data.nodeNum - 1):
+        if (data.arcs[i, data.nodeNum - 1] == 1):
+            expr.addTerms(1, x[i, data.nodeNum - 1, k])
+    model.addConstr(expr == 1, 'c5')
+    expr.clear()
+
+# constraint 6
+big_M = 0
+for i in range(data.nodeNum):
+    for j in range(data.nodeNum):
+        big_M = max(data.dueTime[i] + data.disMatrix[i][j] - data.readyTime[j], big_M)
+
+for k in range(data.vehicleNum):
+    for i in range(data.nodeNum):
+        for j in range(data.nodeNum):
+            if (i != j and data.arcs[i, j] == 1):
+                model.addConstr(s[i, k] + data.disMatrix[i][j] - s[j, k] <= big_M - big_M * x[i, j, k], 'c6')
+
+# model.setParam('MIPGap', 0)
+model.optimize()
+
+print('\n\n----- optimal value -----')
+print(model.ObjVal)
+
+edge_list = []
+for key in x.keys():
+    if (x[key].VarName, ' = ', x[key].x):
+        arc = (str(key[0]), str(key[1]))
+        edge_list.append(arc)
+
+nodes_col['0'] = 'red'
+nodes_col[str(data.nodeNum - 1)] = 'red'
+plt.rcParams['figure.figsize'] = (15, 15)
+nx.draw(Graph
+        , pos = pos_location
+        , node_size = 50
+        , node_color = nodes_col.values()
+        , font_size = 15
+        , font_famiy = 'arial'
+        , edgelist = edge_list
+        )
+fig_name = 'network_' + str(customerNum) + '_1000.jpg'
+plt.savefig(fig_name, dpi = 600)
+plt.show()

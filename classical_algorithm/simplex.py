@@ -81,3 +81,10 @@ while (max_sigma >= eps):
     Nonbasic.remove(enter_var_index)
     Nonbasic.append(leave_var)
     Nonbasic.sort()
+
+    # Gaussian elimination
+    # update pivot row
+    pivot_number = A[leave_var_index][enter_var_index]
+    print('pivot_number: ', pivot_number)
+    for col in range(column_num):
+        A[leave_var_index][col] = A[leave_var_index][col]
