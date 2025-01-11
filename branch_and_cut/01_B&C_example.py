@@ -9,6 +9,8 @@ import networkx as nx
 import copy
 import random
 
+from holoviews.plotting.bokeh.styles import font_size
+from jmespath.ast import current_node
 from networkx.classes import nodes
 from pylint.checkers.utils import node_type
 from sympy.physics.units import length
@@ -317,3 +319,307 @@ nx.draw(Graph
 fig_name = 'network_' + str(customerNum) + '_1000.jpg'
 plt.savefig(fig_name, dpi = 600)
 plt.show()
+
+
+# Node Class
+class Node:
+    def __init__(self):
+        self.local_LB = 0
+        self.local_UB = np.inf
+        self.x_sol = {}
+        self.x_int_sol = {}
+        self.branch_var_list = {}
+        self.model = None
+        self.cnt = None
+        self.is_integer = False
+        self.var_LB = {}
+        self.var_UB = {}
+
+    def deepcopy_node(node):
+        new_node = None
+        new_node.local_LB = 0
+        new_node.local_UB = np.inf
+        new_node.x_sol = copy.deepcopy(node.x_sol)
+        new_node.x_int_sol = copy.deepcopy(node.x_sol)
+        new_node.branch_var_list = []
+        new_node.model = node.model.copy()
+        new_node.cnt = node.cnt
+        new_node.is_integer = node.is_integer
+
+        return new_node
+
+# Branch and Cut framework
+def Branch_and_Cut(VRPTW_model, x_var, summary_interval):
+    Relax_VRPTW_model = VRPTW_model.relax()
+    # initialize the initial node
+    Relax_VRPTW_model.optimize()
+    global_UB = np.inf
+    global_LB = Relax_VRPTW_model.ObjVal
+    eps = 1e-6
+    incumbent_node = None
+    Gap = np.inf
+    feasible_sol_cnt = 0
+
+    # initialize the cuts poo, this dict aims to store all the cuts generated during branch and bound procedure
+    Cuts_pool = {}
+    Cuts_LHS = {}
+    Cut_cnt = 0
+
+    '''
+        Branch and Cut starts
+    '''
+
+    #create initial node
+    Queue = []
+    node = Node()
+    node.local_LB = global_LB
+    node.local_UB = np.inf
+    node.model.setParam('OutputFlag', 0)
+    node.cnt = 0
+    Queue.append(node)
+
+    cnt = 0
+    Global_UB_change = []
+    Global_LB_change = []
+    while (len(Queue) > 0 and global_UB - global_LB > eps):
+        # select the current node
+        current_node = Queue.pop()
+        cnt += 1
+
+        # solve the current model
+        current_node.model.optimize()
+        Solution_status = current_node.model.Status
+
+        '''
+        OPTIMAL = 2
+        INFEASIBLE = 3
+        UNBOUNDED = 5
+        '''
+
+        # check whether the current node is integer and execute prune step
+        '''
+            is_integer : mark whether the current solution is integer solution
+            Is_Pruned : mark whether the current solution is pruned
+        '''
+        is_integer = True
+        Is_Pruned = False
+        if (Solution_status == 2):
+            for var in current_node.model.getVars():
+                if (var.VarName.startswith('x')):
+                    current_node.x_sol[var.varName] = var.x
+                    # record the branchable variable
+                    if (abs(round(var.x, 0) - var.x) >= eps):
+                        is_integer = False
+
+            '''
+                Cuts Generation
+            '''
+            # cut generation
+            temp_cut_cnt = 0
+            if (is_integer == False):
+                # generate cuts
+                # generate at most 5 cuts on each node
+                customer_set = list(range(data.nodeNum))[1: -1] # 去掉了两个depot点
+
+                while (temp_cut_cnt <= 5):
+                    sample_num = random.choice(customer_set[3:])
+                    selected_customer_set = random.sample(customer_set, sample_num)
+                    estimated_veh_num = 0
+                    total_demand = 0
+                    for customer in selected_customer_set:
+                        total_demand += data.demand[customer]
+                    estimated_veh_num = math.ceil(total_demand / data.capacity)
+
+                    current_node.model._vars = x_var
+                    # create cut
+                    cut_lhs = LinExpr()
+                    for key in x_var.keys():
+                        key_org = key[0]
+                        key_des = key[1]
+                        key_vehicle = key[2]
+                        if (key_org not in selected_customer_set and key_des in selected_customer_set):
+                            var_name = 'x_' + str(key_org) + '_' + str(key_des) + '_' + str(key_vehicle)
+                            cut_lhs.addTerms(1, current_node.model.getVarByName(var_name))
+                    Cut_cnt += 1
+                    temp_cut_cnt += 1
+                    cut_name = 'Cut_' + str(Cut_cnt)
+                    Cuts_pool[cut_name] = current_node.model.addConstr(cut_lhs >= estimated_veh_num, name = cut_name)
+                    Cuts_LHS[cut_name] = cut_lhs
+                    Cuts_LHS[cut_name] = cut_lhs
+
+                # lazy upload
+                current_node.model.update()
+
+            '''
+                Cuts Generation ends
+            '''
+
+            # solve the added cut model
+            current_node.model.optimize()
+            is_integer = True
+            if (current_node.model.Status == 2):
+                for var in current_node.model.getVars():
+                    if (var.VarName.startswith('x')):
+                        current_node.x_sol[var.varName] = copy.deepcopy(current_node.model.getVarByName(var.VarName).x)
+                        if (abs(round(var.x, 0) - var.x) >= eps):
+                            is_integer = False
+                            current_node.branch_var_list.append(var.VarName)
+            else:
+                continue
+
+            if (is_integer == True):
+                feasible_sol_cnt += 1
+                current_node.is_integer = True
+                current_node.local_LB = current_node.model.ObjVal
+                current_node.local_UB = current_node.model.ObjVal
+                if (current_node.local_UB < global_UB):
+                    global_UB = current_node.local_UB
+                    incumbent_node = Node.deepcopy_node(current_node)
+
+            if (is_integer == False):
+                # For integer solution node, update the LB and UB also
+                current_node.is_integer = False
+                current_node.local_UB = global_UB
+                current_node.local_LB = current_node.model.ObjVal
+
+            '''
+                PRUNE step
+            '''
+            # prune by optimality
+            if (is_integer == True):
+                Is_Pruned = True
+
+            # prune by bound
+            if (is_integer == False and current_node.local_LB > global_UB):
+                Is_Pruned = True
+
+            Gap = round(100 * (global_UB - global_LB) / global_LB, 2)
+
+        elif (Solution_status != 1):
+            # the current node is infeasible or unbounded
+            is_integer = False
+
+            '''
+                PRUNE step
+            '''
+            # prune by infeasibility
+            Is_Pruned = True
+
+            continue
+
+        '''
+            BRANCH STEP
+        '''
+        if (Is_Pruned == False):
+            # select the branch variable: choose the value which is closest to 0.5
+            branch_var_name = None
+
+            min_diff = 100
+            for var_name in current_node.branch_var_list:
+                if (abs(current_node.x_sol[var_name] - 0.5) < min_diff):
+                    branch_var_name = var_name
+                    min_diff = abs(current_node.x_sol[var_name] - 0.5)
+
+            if (cnt % summary_interval == 0):
+                print('Branch var name: ', branch_var_name, '\t, branch var value: ', current_node.x_sol[branch_var_name])
+            left_var_bound = (int)(current_node.x_sol[branch_var_name])
+            right_var_bound = (int)(current_node.x_sol[branch_var_name]) + 1
+
+            # create two child nodes
+            left_node = Node.deepcopy_node(current_node)
+            right_node = Node.deepcopy_node(current_node)
+
+            # create the left child node
+            temp_var = left_node.model.getVarByName(branch_var_name)
+            left_node.model.addConstr(temp_var <= left_var_bound, name = 'branch_left_' + str(cnt))
+            left_node.model.setParam('OutputFlag', 0)
+            left_node.model.update()
+            cnt += 1
+            left_node.cnt = cnt
+
+            # create the right child node
+            temp_var = right_node.model.getVarByName(branch_var_name)
+            right_node.model.addConstr(temp_var >= right_var_bound, name = 'branch_right_' + str(cnt))
+            right_node.model.setParam('OutputFlag', 0)
+            right_node.model.update()
+            cnt += 1
+            right_node.cnt = cnt
+
+            # update the global LB, explore all the leaf nodes
+            temp_global_LB = np.inf
+            for node in Queue:
+                node.model.optimize()
+                if (node.model.status == 2):
+                    if (node.model.ObjVal <= temp_global_LB and node.model.ObjVal < global_UB):
+                        temp_global_LB = node.model.ObjVal
+
+            global_LB = temp_global_LB
+            Global_UB_change.append(global_UB)
+            Global_LB_change.append(global_LB)
+
+        if (cnt % summary_interval == 0):
+            print('\n\n====================')
+            print('Queue length: ', len(Queue))
+            print('\n --------------- \n', cut, 'UB = ', global_UB, 'LB = ', global_LB, 'Gap = ', Gap, '%', 'feasible_sol_cnt : ', feasible_sol_cnt)
+            print('Cut pool size: ', len(Cuts_pool))
+            NAME = list(Cuts_LHS.keys())[-1]
+            print('RHS: ', estimated_veh_num)
+            print('Cons Num: ', current_node.model.NumConstrs)
+
+    # all the nodes are explored, update the LB and UB
+    incumbent_node.model.optimize()
+    global_UB = incumbent_node.model.ObjVal
+    global_LB = global_UB
+    Gap = round(100 * (global_UB - global_LB) / global_LB, 2)
+    Global_UB_change.append(global_UB)
+    Global_LB_change.append(global_LB)
+
+    print('\n\n\n\n')
+    print('-------------------------------')
+    print('   Branch and Cut terminates   ')
+    print('     Optimal solution found    ')
+    print('-------------------------------')
+    print('\n Inter cnt = ', cnt, '\n\n')
+    print('\n Final Gap = ', Gap, '% \n\n')
+    print(' ----- Optimal Solution ----- ')
+
+    for key in incumbent_node.x_sol.keys():
+        if (incumbent_node.x_sol[key] > 0):
+            print(key, ' = ', incumbent_node.x_sol[key])
+    print('\n Optimal Obj: ', global_LB)
+
+    return incumbent_node, Gap, Global_UB_change, Global_LB_change
+
+
+# Branch and Cut Solve the IP model
+incumbent_node, Gap, Global_UB_change, Global_LB_change = Branch_and_Cut(model, x_var, summary_interval = 100)
+
+for key in incumbent_node.x_sol.keys():
+    if (incumbent_node.x_sol[key] > 0):
+        print(key, ' = ', incumbent_node.x_sol[key])
+
+# plot the result
+font_dict = {
+    'family': 'Arial',
+    'style': 'oblique',
+    'weight': 'normal',
+    'color': 'green',
+    'size': 20
+}
+
+plt.rcParams['figure.figsize'] = (12.0, 8.0)
+plt.rcParams['font.family'] = 'Arial'
+plt.rcParams['font.size'] = 16
+
+x_cor = range(1, len(Global_LB_change) + 1)
+plt.plot(x_cor, Global_LB_change, label = 'LB')
+plt.plot(x_cor, Global_UB_change, label = 'UB')
+plt.legend()
+plt.xlabel('Iteration', fontdict = font_dict)
+plt.ylabel('Bounds update', fontdict = font_dict)
+plt.title('VRPTW (c101-10): Bounds update during branch and cut procedure \n', fontsize = 23)
+plt.savefig('BnC_Bound_updates_VRPTW_c101_60.eps')
+plt.savefig('BnC_Bound_updates_VRPTW_c101_60.pdf')
+plt.show()
+
+print('hello world')
